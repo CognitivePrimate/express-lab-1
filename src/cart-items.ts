@@ -48,14 +48,16 @@ let cart: cartItem[] = [
 
 let nextId: number = cart.length +1;
 
+// GET
 // get cart items
-// cartRoutes.get("./cart-items", (req, res) => {
-//     let cartFilter: object = [];
-//     // get items, filtered by query string params
-//     if (req.query.startsWith()){
-//         maxPrice(num);
-//     }
-// })
+cartRoutes.get("./cart-items", (req, res) => {
+    // let cartFilter: object = [];
+    // get items, filtered by query string params
+    // if (req.query.product.cartItem.startsWith()){
+    //     maxPrice(num);
+    // }
+    res.json(cart);
+})
 
 // get cart items by :id
 cartRoutes.get("/cart-items/:id", (req, res) => {
@@ -67,9 +69,33 @@ cartRoutes.get("/cart-items/:id", (req, res) => {
         // have item
         res.status(200);
         res.json(foundItem)
-    }else {}
-
+    }else {
+        return `ID Not Found: ${res.sendStatus(404)}`;
+    }
 })
+
+// POST 
+// add cart item to array with new id
+cartRoutes.post("/cart-items", (req, res) => {
+    // let newItem: cartItem = {
+    //     id: nextId,
+    //     product: req.body,
+    //     price: req.body,
+    //     quantity: req.body.quantity
+    // };
+    // weird but found on the internet
+    const incomingItem = req.body;
+    incomingItem.id = nextId;
+    // increments each time new item is added to cart array
+    nextId++;
+    // pushes new item into cart
+    cart.push(incomingItem);
+    console.log(cart);
+    res.status(201);
+    res.json(incomingItem);
+})
+
+
 
 
 

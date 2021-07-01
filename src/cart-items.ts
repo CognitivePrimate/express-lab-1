@@ -1,17 +1,6 @@
 import express, {response} from "express";
 const cartRoutes = express.Router();
 
-// const maxPrice = (max: number): object[] => {
-//     let maxPriceArray: object[] = [];
-//     for (let item of cart){
-//         console.log("maxPriceRuns");
-//         item.price <= max ?  maxPriceArray.push(item) : null;
-//     }
-//     console.log(max);
-//     console.log(maxPriceArray);
-//     return maxPriceArray;
-// }
-
 // cart object interface
 interface cartItem {
     product: string,
@@ -53,36 +42,51 @@ let nextId: number = cart.length +1;
 // GET
 // get cart items
 cartRoutes.get("/cart-items", (req, res) => {
-    let cartFilter: object = [];
+    // string query arrays
+    let prefixArray: object[] = [];
     let maxPriceArray: object[] = [];
-    const maximumPrice: any = req.query.maximumPrice;
-    // get items, filtered by query string params
-    // typeof parseInt(maximumPrice  === "number")   <----taken from below's if statement
-    if (req.query.maxPrice){
-        console.log("in max query");
-        // maxPrice(maximumPrice);
-        // copying maxPrice() function into here essentially
-       
-        for (let item of cart){
-            console.log("maxPriceLoopRuns");
-            item.price <= parseInt(maximumPrice) ?  maxPriceArray.push(item) : null;
-        }
-    }
+    let pageSizeArray: object[] = [];
 
-    console.log("get is being accessed");
-    res.json(cart);
-    console.log(maximumPrice);
-    console.log(maxPriceArray);
-    return maxPriceArray;
-    
-    
+    // string query variables
+    const maxPrice: number = Number(req.query.maxPrice);
+    const prefix: string = String(req.query.prefix);
+    const pageSize: number = Number(req.query.pageSize);
+
+    // string query params
+    if (maxPrice){
+        for (let item of cart){
+            item.price <= maxPrice ?  maxPriceArray.push(item) : null;
+        }
+        console.log(maxPriceArray);
+        res.json(maxPriceArray);
+    }else if (prefix && prefix != "undefined"){
+        console.log(prefix)
+        for (let item of cart){
+            item.product.startsWith(prefix) ? prefixArray.push(item) : null;
+        }
+        console.log(prefixArray);
+        res.status(200);
+        res.json(prefixArray);
+    }else if(pageSize){
+        console.log("pageSize")
+        console.log(pageSize)
+        for (let i: number = 0; i < pageSize; i++){
+            console.log(cart[i]);
+            pageSizeArray.push(cart[i]);
+        }
+        console.log(pageSizeArray);
+        res.json(pageSizeArray);
+    } else {
+        res.status(200);
+        res.json(cart);
+    };
+
 })
 
 // get cart items by :id
 cartRoutes.get("/cart-items/:id", (req, res) => {
-    let foundItem = cart.find((item) => {
+    let foundItem: cartItem|undefined = cart.find((item) => {    
         return item.id === parseInt(req.params.id)
-        // ^^^^is this necc? can i just move if statement below up into this instead? ASK KYLE***
     });
     if (foundItem){
         // have item
@@ -118,10 +122,10 @@ cartRoutes.put("/cart-items/:id", (req, res) => {
     if (itemIndex > -1){
         console.log("found, now in if statement");
         cart[itemIndex] = {
-            id:cart[itemIndex].id,
             product: req.body.product,
             price: req.body.price,
-            quantity: req.body.quantity
+            quantity: req.body.quantity,
+            id:cart[itemIndex].id
         };
         // send update cart array
         res.status(200);
